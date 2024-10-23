@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="sv">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moveout homepage</title>
+    <link rel="stylesheet" href="/style/style.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css">
+</head>
+
+<body>
+<header class="header">
+    <a href="/" class="header-logo">MoveOut</a>
+    <nav class="navbar">
+        
+        <div class="hamburger" id="hamburger">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+        
+        <div class="navbar-links" id="navbar-links">
+            <% if (isAuthenticated) { %>
+                    <% if (user.isAdmin) { %>
+                        <a href="/admin/dashboard">Dashboard</a>
+                    <% } %>
+                <a href="/profile">Profile</a>
+                <% if (user.isVerified && user.isActive) { %>
+                <a href="/create">Create</a>
+                <a href="/boxes">Labels & Boxes</a>
+                <% } %>
+                <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/sendemail">Contact</a>
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            <% } %>
+
+           
+        </div>
+    </nav>
+</header>
+
+<script>
+    const hamburger = document.getElementById('hamburger');
+    const navbarLinks = document.getElementById('navbar-links');
+
+    hamburger.addEventListener('click', () => {
+        navbarLinks.classList.toggle('active');
+        hamburger.classList.toggle('active');
+    });
+</script>
+<script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
+</body>
+</html>
+

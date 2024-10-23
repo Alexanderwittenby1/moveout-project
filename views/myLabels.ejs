@@ -1,0 +1,18 @@
+<%- include("header", { title: title }); %>
+<div class="hero">
+    <div class="hero-content">
+        <h1>My Labels</h1>
+
+        <ul>
+            <% labels.forEach(label => { %>
+                <li>
+                    <h2>Label: <%= label.label %></h2>
+                    <p>Content: <%= label.content %></p>
+                    <img src="<%= label.qrCodeUrl %>" alt="QR Code" style="width:100px; height:100px;">
+                    <img src="/images/<%= label.label %>.png" alt="<%= label.label %> Label" style="width: 50px; height: 50px;">
+                </li>
+            <% }); %>
+        </ul>
+    </div>
+</div>
+<%- include('footer'); %>

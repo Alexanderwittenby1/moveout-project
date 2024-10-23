@@ -1,0 +1,61 @@
+<%- include('header', { title: title }); %>
+
+<div class="hero">
+    <div class="box-container">
+        <div class="box-header">
+            <h1>Box Information</h1>
+            <p class="subtitle">Here is the detailed content of the box</p>
+        </div>
+
+        <% if (messages.error && messages.error.length > 0) { %>
+            <div class="alert alert-danger">
+                <%= messages.error %>
+            </div>
+        <% } %>
+        
+        <div class="box-details">
+            <div class="box-field">
+                <strong>Box Name:</strong>
+                <span><%= box.box_name %></span>
+                
+            </div>
+            <div class="box-field">
+                <strong>Box Content:</strong>
+                <span><%= box.content %></span>
+            </div>
+            <div class="box-field">
+                <strong>Label Design:</strong>
+                <span><%= box.label_design %></span>
+            </div>
+        </div>
+        
+        <% if (box.picture_file_url) { %>
+            <div class="box-media">
+                <div class="box-image">
+                    <img src="<%= box.picture_file_url %>" alt="Box Image" />
+                </div>
+            </div>
+        <% } %>
+
+        <% if (box.audio_file_url) { %>
+            <div class="box-audio">
+                <audio controls>
+                    <source src="<%= box.audio_file_url %>" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        <% } %>
+        <div class="box-share">
+            <form action="/box-content/share-box" method="POST">
+                <h2>Share this box</h2>
+                <input type="hidden" name="box_id" value="<%= box._id %>" />
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <button type="submit">Share Box</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<%- include('footer'); %>

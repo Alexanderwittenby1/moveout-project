@@ -1,0 +1,75 @@
+<%- include("header", {title: title}); %>
+<div class="hero">
+   <div class="background-preview <%= box.background %>" style="padding: 20px;">
+        <h1><%= box.box_name %></h1>
+
+        <!-- Visa flashmeddelanden -->
+        <% if (message.error && message.error.length > 0) { %>
+            <div class="alert alert-danger">
+                <%= message.error %>
+            </div>
+        <% } %>
+        
+        <img src="<%= boxQrCode %>" alt="QR Code" id="qrcode">
+
+        <!-- Visar vald etikettbild -->
+        <div class="box-label" style="margin-top: 20px;">
+            <% if (box.label_design === 'fragile') { %>
+                <img src="/img/fragile.png" alt="Fragile Label" class="label-img" style="max-width: 150px;">
+            <% } else if (box.label_design === 'heavy') { %>
+                <img src="/img/heavy.png" alt="Heavy Label" class="label-img" style="max-width: 150px;">
+            <% } else if (box.label_design === 'clothes') { %>
+                <img src="/img/clothes.png" alt="Clothes Label" class="label-img" style="max-width: 150px;">
+            <% } else { %>
+                <p>No label assigned.</p>
+            <% } %>
+        </div>
+        
+        <form>
+            <input type="button" class="blue-button" value="Print" onclick="printQrCode()" />
+        </form>
+    </div>
+
+
+</div>
+<%- include("footer"); %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initiera Plyr-spelaren för ljudfilen om den finns
+        const audioPlayer = document.getElementById('audio-player');
+        if (audioPlayer) {
+            const player = new Plyr(audioPlayer);
+        }
+    });
+
+    function printQrCode() {
+        const qrCodeImg = document.querySelector('#qrcode'); // Hämta QR-kodsbilden
+        const labelImg = document.querySelector('.label-img'); // Hämta etikettbilden om den finns
+
+        const printWindow = window.open('', '_blank'); // Öppna nytt fönster
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Print QR Code and Label</title>
+                    <style>
+                        body { text-align: center; margin: 50px; }
+                        img { max-width: 100%; margin-bottom: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${document.querySelector('h1').innerText}</h1>
+                    <img src="${qrCodeImg.src}" alt="QR Code">
+                    <br>
+                    ${labelImg ? `<img src="${labelImg.src}" alt="Label">` : '<p>No label assigned.</p>'}
+                </body>
+            </html>
+        `);
+        printWindow.document.close(); // Stäng dokumentet för att ladda innehållet
+        printWindow.focus(); // Fokusera på det nya fönstret
+        printWindow.print(); // Initiera utskrift
+        printWindow.onafterprint = function () {
+            printWindow.close(); // Stäng fönstret efter utskrift
+        };
+    }
+</script>

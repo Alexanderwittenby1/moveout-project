@@ -1,0 +1,214 @@
+<%- include('header', {title: title}); %>
+
+<div class="hero">
+    <div class="hero-content">
+        <form action="/create-label" method="POST" enctype="multipart/form-data"> 
+            <h1>Create box</h1>
+            <p>Fill in the form below to create a label for your moving box</p>
+            <div class="form-group">
+                
+                <!-- Box Name -->
+                <label for="name">Box Name</label>
+                <input type="text" name="box_name" id="box_name" placeholder="Name your box" required>
+
+                <!-- Box Content -->
+                <label for="content">Box Content</label>
+                <textarea name="content" id="content" rows="4" placeholder="Describe the contents of the box" required></textarea>
+
+                <!-- Label Design with Images -->
+                <label>Label Design</label>
+                <div class="label-options">
+                    <label>
+                        <input type="radio" name="label" value="fragile" required>
+                        <img src="/img/fragile.png" alt="Fragile" />
+                    </label>
+                    <label>
+                        <input type="radio" name="label" value="heavy" required>
+                        <img src="/img/heavy.png" alt="Heavy" />
+                    </label>
+                    <label>
+                        <input type="radio" name="label" value="clothes" required>
+                        <img src="/img/clothes.png" alt="Clothes" />
+                    </label>
+                </div>
+
+                <!-- Take Picture -->
+                <div class="create-button">
+                    <button type="button" id="open-camera">Open Camera</button>
+                </div>
+                <video id="video" width="320" height="240" autoplay style="display:none;"></video>
+                <button type="button" id="take-photo" style="display:none;">Take Photo</button>
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+                <input type="hidden" name="photo" id="photo"/>
+
+                <!-- Audio Recording -->
+                <divc class="create-button">
+                    <button type="button" id="start-recording">Start Recording</button>
+                </div>
+                <button type="button" id="stop-recording" style="display:none;">Stop Recording</button>
+                <audio id="audio-preview" controls style="display:none;"></audio>
+                <input type="hidden" name="audio" id="audio" />
+
+                
+                <input type="file" name="file" id="file" accept="image/*, audio/*" />
+                
+
+
+                <label>Label Background</label>
+                <div class="background-options">
+                    <label>
+                        <input type="radio" name="background" value="color1" required>
+                        <span style="background-color: lightblue; width: 25px; height: 25px; display: inline-block;"></span>
+                    </label>
+                    <label>
+                        <input type="radio" name="background" value="color2" required>
+                        <span style="background-color: lightgreen; width: 25px; height: 25px; display: inline-block;"></span>
+                    </label>
+                    <label>
+                        <input type="radio" name="background" value="color3" required>
+                        <span style="background-color: red; width: 25px; height: 25px; display: inline-block;"></span>
+                    </label>
+                </div>
+
+                <label>Box Visibility</label>
+                <div class="visibility-options">
+                    <label>
+                        <input type="radio" name="visibility" value="public" required>
+                        Public
+                    </label>
+                    <label>
+                        <input type="radio" name="visibility" value="private" required>
+                        Private
+                    </label>
+                </div>
+
+
+                <div class="label-preview" id="label-preview">
+                    <h2 id="preview-box-name">Box Name</h2>
+                    <p id="preview-content">Describe the contents of the box</p>
+                    <img id="preview-label-image" src="" alt="Label Image" style="display: none;" /> 
+                    <div id="preview-background" class="background"></div>
+                </div>
+
+
+                <div class="create-button">
+                    <button type="submit">Create Label</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<%- include("footer"); %>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photoInput = document.getElementById('photo');
+    const audioPreview = document.getElementById('audio-preview');
+    const audioInput = document.getElementById('audio');
+    const previewBackground = document.getElementById('preview-background');
+    const previewBoxName = document.getElementById('preview-box-name');
+    const previewContent = document.getElementById('preview-content');
+    const previewLabel = document.getElementById('preview-label');
+
+    let mediaRecorder;
+    let audioChunks = [];
+
+    // Öppna kameran
+    document.getElementById('open-camera').addEventListener('click', async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        video.style.display = 'block';
+        document.getElementById('take-photo').style.display = 'inline';
+    });
+
+    // Ta foto
+    document.getElementById('take-photo').addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL('image/png');
+        photoInput.value = dataURL;
+
+        video.style.display = 'none';
+        canvas.style.display = 'none';
+        document.getElementById('take-photo').style.display = 'none';
+    });
+
+    // Ljudinspelning
+    document.getElementById('start-recording').addEventListener('click', async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            audioPreview.src = audioUrl;
+            audioPreview.style.display = 'block';
+
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                audioInput.value = reader.result;
+            };
+            reader.readAsDataURL(audioBlob);
+
+            audioChunks = [];
+        };
+
+        document.getElementById('stop-recording').style.display = 'inline';
+        document.getElementById('start-recording').style.display = 'none';
+    });
+
+    document.getElementById('stop-recording').addEventListener('click', () => {
+        mediaRecorder.stop();
+        document.getElementById('stop-recording').style.display = 'none';
+        document.getElementById('start-recording').style.display = 'inline';
+    });
+
+    // Uppdatera förhandsgranskningen av boxnamn och innehåll
+    document.getElementById('box_name').addEventListener('input', (event) => {
+        previewBoxName.textContent = event.target.value || 'Box Name'; // Standardtext
+    });
+
+    document.getElementById('content').addEventListener('input', (event) => {
+        previewContent.textContent = event.target.value || 'Describe the contents of the box'; // Standardtext
+    });
+
+
+    const previewLabelImage = document.getElementById('preview-label-image');
+    document.querySelectorAll('input[name="label"]').forEach(input => {
+        input.addEventListener('change', () => {
+            const selectedLabel = document.querySelector('input[name="label"]:checked');
+            if (selectedLabel) {
+                // Hämta bilden från den valda etiketten
+                const labelImage = selectedLabel.nextElementSibling.src;
+                previewLabelImage.src = labelImage; // Sätt bildens src
+                previewLabelImage.style.display = 'block'; 
+            }
+        });
+    });
+
+
+    // Uppdatera bakgrundsdesignen
+    document.querySelectorAll('input[name="background"]').forEach(input => {
+        input.addEventListener('change', () => {
+            const value = input.value;
+            previewBackground.className = 'background'; // Rensa tidigare klasser
+            if (value === 'border') {
+                previewBackground.classList.add('border');
+            } else {
+                previewBackground.classList.add(value); // Lägg till klassen för färgen
+            }
+        });
+    });
+
+    // För att också uppdatera bakgrunden direkt vid sidladdning
+    document.querySelector('input[name="background"]:checked')?.dispatchEvent(new Event('change'));
+
+</script>

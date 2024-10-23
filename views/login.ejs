@@ -1,0 +1,33 @@
+<%- include("header", { title: title }); %>
+
+<div class="hero">
+    <div class="login-page">
+        <% if (messages.error) { %>
+            <div class="alert alert-danger">
+                <%= messages.error %>
+            </div>
+        <% } %>
+
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button class="sign-in-button" type="submit">Login</button>
+
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+            <div class="google">
+                <a href="<%= googleLoginUrl %>" class="google-link">
+                    <img src="img/google.png" alt="Google Icon" class="google-icon">
+                    <span class="google-text">Sign in with Google</span>
+                </a>
+            </div>
+        </form>
+
+       
+    </div>
+</div>
+<%- include("footer"); %>

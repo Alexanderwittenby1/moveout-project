@@ -1,0 +1,68 @@
+<%- include("header", { title: title }); %>
+
+<div class="hero">
+    <div class="hero-content">
+        <h1>Dashboard</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Admin</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.email %></td>
+                        <td><%= user.first_name + ' ' + user.last_name %></td>
+                        <td>
+                            <form action="/admin/set-admin" method="POST" style="display:inline;">
+                                <input type="hidden" name="user_id" value="<%= user.user_id %>">
+                                <input type="checkbox" name="is_admin" value="1" <%= user.is_admin ? 'checked' : '' %> onchange="this.form.submit()">
+                                <label for="is_admin">Sätt till Admin</label>
+                            </form>
+                        </td>
+                        <td><%= user.is_active ? 'Active' : 'Inactive' %></td>
+                        <td>
+                            <form action="/admin/deactivate-user" method="POST" style="display:inline;">
+                                <input type="hidden" name="user_id" value="<%= user.user_id %>">
+                                <button type="submit"><%= user.is_active ? 'Deactivate' : 'Activate' %></button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <h2>Boxes</h2>
+        <table class="box-table">
+            <thead>
+                <tr>
+                    <th>Box ID</th>
+                    <th>User ID</th>
+                    <th>Box Name</th>
+                    <th>Box Owner</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% boxJoin.forEach(box => { %>
+                    <tr>
+                        <td><%= box.user_id %></td>
+                        <td><%= box.box_id %></td>
+                        <td><%= box.box_name %></td>
+                        <td><%= box.first_name %> <%= box.last_name %></td>
+
+                    </tr>
+                <% }); %>
+        </table>
+        <p>Antal lådor: <%= boxes.length %></p>
+        
+    </div>
+</div>
+
+<%- include("footer"); %>

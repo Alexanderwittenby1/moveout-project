@@ -1,0 +1,52 @@
+<%- include("header", { title: title }); %>
+<div class="hero">
+    <div class="hero-content">
+        <h1>Your labels</h1>
+
+        <form action="" method="GET" id="boxForm">
+            <select name="box" id="box" style="padding: 10px; font-size: 16px;">
+                <option value="" disabled selected>Select a box</option>
+                <% for (let box of boxes) { %>
+                    <option value="<%- box.id %>"><%- box.boxName %></option>
+                <% } %>
+            </select>
+            <button type="button" onclick="redirectToBox()" style="padding: 10px 20px; font-size: 16px; margin-left: 10px;">Go</button>
+        </form>
+
+        <h1>View content</h1>
+        <p>Choose a box to view its content</p>
+        <form id="contentForm" action="" method="GET">
+            <select name="box" id="contentBox" style="padding: 10px; font-size: 16px;">
+                <option value="" disabled selected>Select a box</option>
+                <% for (let box of boxes) { %>
+                    <option value="<%- box.id %>"><%- box.boxName %></option>
+                <% } %>
+            </select>
+            <button type="button" onclick="redirectToContent()" style="padding: 10px 20px; font-size: 16px; margin-left: 10px;">View Content</button>
+        </form>
+    </div>
+</div>
+
+<%- include('footer'); %>
+
+<script>
+    function redirectToBox() {
+        const selectElement = document.getElementById('box');
+        const selectedValue = selectElement.value;
+        if (selectedValue) {
+            window.location.href = `/boxes/${selectedValue}`; // Navigera till boxens sida
+        } else {
+            alert('Please select a box');
+        }
+    }
+
+    function redirectToContent() {
+        const selectElement = document.getElementById('contentBox');
+        const selectedValue = selectElement.value;
+        if (selectedValue) {
+            window.location.href = `/box-content/${selectedValue}`; 
+        } else {
+            alert('Please select a box');
+        }
+    }
+</script>

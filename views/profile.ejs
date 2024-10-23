@@ -1,0 +1,101 @@
+<%- include("header", {title: title}); %>
+
+<div class="hero">
+    <div class="hero-profile">
+        <h1>Profile</h1>
+
+        <!-- Profilbild -->
+        <div class="profile-picture" style="position: relative; display: inline-block;">
+            <% if (user.profile_picture) { %>
+                <label for="actual-button">
+                    <img src="<%= user.profile_picture %>" alt="Profile Picture" style="cursor: pointer;">
+                </label>
+            <% } else { %>
+                <label for="actual-button">
+                    <img src="img/avatar.png" alt="Profile Picture" style="cursor: pointer;">
+                </label>
+            <% } %>
+        
+            <form action="/profile/picture" method="post" enctype="multipart/form-data">
+                <input type="file" id="actual-button" name="file" accept="image/*" required hidden>
+                <button type="submit" id="upload-button" hidden></button>
+            </form>
+
+            <span class="tooltip">Change</span>
+        </div>
+
+        <p>Email: <%= user.email %></p>
+        <form action="/profile/updateEmail" method="post" style="display: inline;">
+            <button type="submit">Update</button>
+            <input type="email" id="email" name="email" placeholder="New Email" required>
+        </form>
+
+        <p>First Name: <%= user.firstName %></p>
+        <p>Last Name: <%= user.lastName %></p>
+        <p>Account created: <%= user.createdAt %></p>
+
+        <% if (user.isVerified == 1) { %>
+            <p>Verified: <span style="color: green;">&#x1F44D; Yes</span></p>
+        <% } else { %>
+            <form action="/profile/verify" method="post" style="display: inline;">
+                <h3 style="color: red;">To access MoveOut's features you'll need to Verify your account.</h3>
+                <p>Check your email for the verificationCode</p>
+                <label for="verificationCode">Verification Code:</label>
+                <input type="text" id="verificationCode" name="verificationCode" required placeholder="Code goes here">
+                <button type="submit">Verify</button>
+            </form>
+        <% } %>
+
+        <% if (user.isAdmin == 1) { %>
+            <p>Admin: <span style="color: green;">&#x1F44D; Yes</span></p>
+        <% } %>
+
+        <form action="/profile/changepassword" method="GET">
+            <button type="submit">Change Password</button>
+        </form>
+        
+    </div>
+</div>
+
+<%- include("footer"); %>
+
+
+
+
+
+
+
+
+<script>
+    document.getElementById('actual-button').addEventListener('change', function() {
+        document.getElementById('upload-button').click();
+    });
+</script>
+
+<style>
+    .profile-picture {
+        position: relative;
+    }
+
+    .tooltip {
+        visibility: hidden;
+        width: 100px;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        border-radius: 5px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        top: 70%;
+        left: 45%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .profile-picture:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+</style>

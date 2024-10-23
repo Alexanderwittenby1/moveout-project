@@ -1,0 +1,19 @@
+<%- include("header", {title: title }); %>
+
+<section class="hero" id="hero">
+    <div class="hero-homepage">
+            <% if (isAuthenticated ) { %>
+                <p>Welcome back <%= user.firstName %>!</p>
+            <% } else { %>
+        
+                <h1>Your best friend when it comes to moving houses</h1>
+                
+            <% } %>
+        
+    </div>
+    
+</section>
+
+<%- include("footer"); %>
+
+

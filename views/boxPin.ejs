@@ -1,0 +1,17 @@
+<%- include('header', { title: title }); %>
+
+<div class="hero">
+    <div class="box-container">
+        <h1>Access Box</h1>
+        <% if (messages.error) { %>
+            <div class="error-message"><%= messages.error %></div>
+        <% } %>
+        <p>Vänligen ange PIN-koden för att få åtkomst till lådan:</p>
+        <form action="/box-content/<%= boxId %>" method="POST">
+            <input type="text" name="pin" placeholder="Ange PIN" required>
+            <button type="submit">Skicka</button>
+        </form>
+    </div>
+</div>
+
+<%- include('footer'); %>
