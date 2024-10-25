@@ -125,7 +125,22 @@ const boxService = {
         const query = 'SELECT * FROM BoxShares WHERE box_id = ? AND user_id = ?';
         const [rows] = await db.query(query, [boxId, userId]);
         return rows.length > 0;
-    }
+    },
+
+    updateBox: async (boxId, boxName, content, labelDesign, audioFileUrl, pictureFileUrl, background, visibility) => {
+        const query = `UPDATE Boxes SET box_name = ?, content = ?, label_design = ?, audio_file_url = ?, picture_file_url = ?, background = ?, visibility = ? WHERE box_id = ?`;
+        let res = await db.query(query, [boxName, content, labelDesign, audioFileUrl, pictureFileUrl, background, visibility, boxId]);
+        return res[0];
+    },
+    getSharedBoxes: async (userId) => {
+        const query = `
+            SELECT Boxes.* FROM Boxes
+            JOIN BoxShares ON Boxes.box_id = BoxShares.box_id
+            WHERE BoxShares.user_id = ?
+        `;
+        const [rows] = await db.query(query, [userId]);
+        return rows;
+    },
 };
 
 module.exports = boxService;

@@ -2,35 +2,35 @@
 
 <div class="hero">
     <div class="hero-content">
-        <form action="/create-label" method="POST" enctype="multipart/form-data"> 
-            <h1>Create box</h1>
-            <p>Fill in the form below to create a label for your moving box</p>
+        <form action="/update/box" method="POST" enctype="multipart/form-data"> 
+            <h1>Edit box</h1>
+            <input name="box_id" value="<%= box.box_id %>" />
             <div class="form-group">
                 
                 <!-- Box Name -->
                 <label for="name">Box Name</label>
-                <input type="text" name="box_name" id="box_name" placeholder="Name your box" required>
+                <input type="text" name="box_name" id="box_name" placeholder="Name your box" value="<%= box.box_name %>" required>
 
                 <!-- Box Content -->
                 <label for="content">Box Content</label>
-                <textarea name="content" id="content" rows="4" placeholder="Describe the contents of the box" required></textarea>
+                <textarea name="content" id="content" rows="4" placeholder="Describe the contents of the box" required> <%= box.content %></textarea>
 
                 <!-- Label Design with Images -->
                 <label>Label Design</label>
                 <div class="label-options">
-                    <label>
-                        <input type="radio" name="label" value="fragile" required>
-                        <img src="/img/fragile.png" alt="Fragile" />
-                    </label>
-                    <label>
-                        <input type="radio" name="label" value="heavy" required>
-                        <img src="/img/heavy.png" alt="Heavy" />
-                    </label>
-                    <label>
-                        <input type="radio" name="label" value="clothes" required>
-                        <img src="/img/clothes.png" alt="Clothes" />
-                    </label>
-                </div>
+                <label>
+                    <input type="radio" name="label" value="fragile" <%= box.label_design === 'fragile' ? 'checked' : '' %> required>
+                    <img src="/img/fragile.png" alt="Fragile" />
+                </label>
+                <label>
+                    <input type="radio" name="label" value="heavy" <%= box.label_design === 'heavy' ? 'checked' : '' %> required>
+                    <img src="/img/heavy.png" alt="Heavy" />
+                </label>
+                <label>
+                    <input type="radio" name="label" value="clothes" <%= box.label_design === 'clothes' ? 'checked' : '' %> required>
+                    <img src="/img/clothes.png" alt="Clothes" />
+                </label>
+            </div>
 
                 <!-- Take Picture -->
                 <div class="create-button">
@@ -40,7 +40,6 @@
                 <button type="button" id="take-photo" style="display:none;">Take Photo</button>
                 <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
                 <input type="hidden" name="photo" id="photo"/>
-                <img id="preview-photo" alt="Preview" style="display:none; width: 320px; height: 240px;" />
 
                 <!-- Audio Recording -->
                 <divc class="create-button">
@@ -58,15 +57,15 @@
                 <label>Label Background</label>
                 <div class="background-options">
                     <label>
-                        <input type="radio" name="background" value="color1" required>
+                        <input type="radio" name="background" value="color1" <%= box.background === 'color1' ? 'checked' : '' %> required> 
                         <span style="background-color: lightblue; width: 25px; height: 25px; display: inline-block;"></span>
                     </label>
                     <label>
-                        <input type="radio" name="background" value="color2" required>
+                        <input type="radio" name="background" value="color2" <%= box.background === 'color2' ? 'checked' : '' %> required>
                         <span style="background-color: lightgreen; width: 25px; height: 25px; display: inline-block;"></span>
                     </label>
                     <label>
-                        <input type="radio" name="background" value="color3" required>
+                        <input type="radio" name="background" value="color3" <%= box.background === 'color3' ? 'checked' : '' %> required>
                         <span style="background-color: red; width: 25px; height: 25px; display: inline-block;"></span>
                     </label>
                 </div>
@@ -74,11 +73,11 @@
                 <label>Box Visibility</label>
                 <div class="visibility-options">
                     <label>
-                        <input type="radio" name="visibility" value="public" required>
+                        <input type="radio" name="visibility" value="public" <%= box.visibility === 'public' ? 'checked' : '' %> required>
                         Public
                     </label>
                     <label>
-                        <input type="radio" name="visibility" value="private" required>
+                        <input type="radio" name="visibility" value="private" <%= box.visibility === 'private' ? 'checked' : '' %> required>
                         Private
                     </label>
                 </div>
@@ -131,11 +130,6 @@
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataURL = canvas.toDataURL('image/png');
         photoInput.value = dataURL;
-
-        // Visa förhandsgranskningen
-        const previewPhoto = document.getElementById('preview-photo');
-        previewPhoto.src = dataURL; // Sätt src till den fångade bilden
-        previewPhoto.style.display = 'block'; // Visa bilden
 
         video.style.display = 'none';
         canvas.style.display = 'none';

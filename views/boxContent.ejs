@@ -45,15 +45,22 @@
                 </audio>
             </div>
         <% } %>
+        <% if (isOwner) { %>
         <div class="box-share">
-            <form action="/box-content/share-box" method="POST">
+            <form action="/share-box" method="POST">
                 <h2>Share this box</h2>
-                <input type="hidden" name="box_id" value="<%= box._id %>" />
+                <input name="box_id" value="<%= box.box_id %>" />
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
                 <button type="submit">Share Box</button>
             </form>
         </div>
+        <div class="edit-box">
+            <a href="/box-content/edit/<%= box.box_id %>" class="edit-button">Edit this Box</a>
+        </div>
+
+        <% } %>
+
     </div>
 
 </div>

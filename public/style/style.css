@@ -352,7 +352,7 @@ footer {
 .box-field {
     display: flex;
     /* justify-content: space-evenly; */
-    text-align: right;
+    
     margin-bottom: 15px;
     font-size: 16px;
     color: #444;
@@ -811,3 +811,35 @@ input[type="email"]{
     font-size: 1em;
     text-align: left;
 }
+
+.columns {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .column {
+        flex: 1;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .column h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .column form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .column select {
+        margin-bottom: 10px;
+    }
+
+    .column button {
+        align-self: flex-start;
+    }

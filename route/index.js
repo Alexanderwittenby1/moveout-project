@@ -220,9 +220,6 @@ router.post('/create-label', upload.single("file"), async function(req, res) {
     try {
         const { box_name, content, label, photo, audio, background, visibility } = req.body;
         const user_id = req.session.user.id;
-        // console.log(req.body);
-        
-
         let audioUrl = null;
         let pictureUrl = null;
         let pin = null;
@@ -231,33 +228,18 @@ router.post('/create-label', upload.single("file"), async function(req, res) {
             pin = boxService.generatePin();
         }
 
-        
-
         if (audio) {
             console.log('Audio Base64 Data:', audio);
-            const base64Data = audio.replace(/^data:audio\/mpeg;base64,/, "");  // Tar bort base64 prefix
-            const buffer = Buffer.from(base64Data, 'base64');
-            console.log("Converted buffer:", buffer);  // Konverterar Base64 till Buffer
+            const base64Data = audio.replace(/^data:audio\/mpeg;base64,/, "");  
+            const buffer = Buffer.from(base64Data, 'base64');  
             const uploadResult = await s3Service.uploadAudio(buffer, `recorded-audio-${Date.now()}.mp3`);
-            console.log('Upload result:', uploadResult);
-            
             audioUrl = uploadResult.Location;
-            console.log('Audio URL:', audioUrl);
         }
-
 
         if (photo) {
             try {
-              
                 const fileName = `photo-${Date.now()}.jpeg`; 
-
-                
                 const uploadResult = await s3Service.uploadPhoto(photo, fileName);
-
-                // Log the result of the upload
-                console.log('Upload result:', uploadResult);
-
-                // Save the picture URL from the S3 response
                 pictureUrl = uploadResult.Location;
                 console.log('Photo URL:', pictureUrl);
             } catch (error) {
@@ -265,7 +247,6 @@ router.post('/create-label', upload.single("file"), async function(req, res) {
             }
         }
 
-        // Om en fil laddades upp
         if (req.file) {
             console.log("Received file:", req.file);
             const file = req.file;
@@ -285,9 +266,8 @@ router.post('/create-label', upload.single("file"), async function(req, res) {
             }
         }
 
-        // Spara etiketten i databasen med korrekta URL:er
+    
         const box = await boxService.createBox(user_id, box_name, content, label, audioUrl, pictureUrl, background , visibility, pin);
-
         console.log('Box created:', box);
         res.redirect('/boxes');
     } catch (err) {
@@ -296,6 +276,56 @@ router.post('/create-label', upload.single("file"), async function(req, res) {
     }
 });
 
+
+router.get('/box-content/edit/:id', async (req, res) => {
+    try {
+        const boxId = req.params.id;
+        const box = await boxService.getBoxById(boxId);
+        console.log('Box details:', box);
+        res.render('edit-box', { box, title: 'Edit Box' });
+    } catch (err) {
+        console.error('Error fetching box details for edit:', err);
+        res.status(500).send('Error fetching box details for edit');
+    }
+});
+
+router.post('/update/box', upload.single('file'), async (req, res) => {
+    try {
+        const { box_id, box_name, content, label, background, visibility, photo } = req.body;
+        const existingBox = await boxService.getBoxById(box_id);
+        // Hantera filuppladdning om det finns
+        let pictureUrl = existingBox.picture_file_url;
+        let audioUrl = existingBox.audio_file_url; // Definiera audioUrl här
+
+        // Om det finns en ljudinspelning i req.body, behandla den (om du använder ljudinspelningar)
+        if (req.body.audio) {
+            const base64Data = req.body.audio.replace(/^data:audio\/mpeg;base64,/, "");  // Ta bort base64 prefix
+            const buffer = Buffer.from(base64Data, 'base64');
+            const uploadResult = await s3Service.uploadAudio(buffer, `recorded-audio-${Date.now()}.mp3`);
+            audioUrl = uploadResult.Location;
+        }
+
+          if (req.body.photo) {
+            try {
+                const fileName = `photo-${Date.now()}.jpeg`; 
+                const uploadResult = await s3Service.uploadPhoto(photo, fileName);
+                pictureUrl = uploadResult.Location;
+                console.log('Photo URL:', pictureUrl);
+            } catch (error) {
+                console.error('Error uploading photo:', error);
+            }
+        }
+
+        // Här kan du också uppdatera boxen med pictureUrl och audioUrl
+        const result = await boxService.updateBox(box_id, box_name, content, label, audioUrl, pictureUrl, background, visibility);
+        
+        console.log('Box updated:', result);
+        res.redirect(`/box-content/${box_id}`);
+    } catch (err) {
+        console.error('Error updating box:', err);
+        res.status(500).send('Error updating box');
+    }
+});
 
 
 
@@ -309,6 +339,7 @@ router.get('/boxes', async (req, res) => {
             }
         
             const allBoxes = await boxService.getUserBoxes(req.session.user.id);
+            const sharedBoxes = await boxService.getSharedBoxes(req.session.user.id);
             const data = allBoxes.map(box => {
                 return {
                     id: box.box_id,
@@ -320,7 +351,7 @@ router.get('/boxes', async (req, res) => {
                 
             });
             
-            res.render('boxes', { boxes:data, title: 'Boxes' });
+            res.render('boxes', { boxes:data, sharedBoxes , title: 'Boxes' });
 
     } catch (err) {
         console.error('Error displaying QR code:', err);
@@ -451,6 +482,33 @@ router.post('/admin/set-admin', async (req, res) => {
 });
 
 
+router.post('/admin/deactivate-user', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/login'); // Om användaren inte är inloggad, omdirigera till inloggning
+        }
+
+        if (!req.session.user.isAdmin) {
+            return res.status(403).send('You are not authorized to view this page');
+        }
+
+        const userId = req.body.user_id;
+        const isActive = req.body.is_active === '1';
+        const result = await userService.deactivateUser(userId,isActive);
+
+        if (result) {
+            res.redirect('/admin/dashboard');
+        } else {
+            res.send('Error deactivating user');
+        }
+    } catch
+    (err) {
+        console.error(err);
+        res.status(500).send('Error: ' + err.message);
+    }
+
+});
+
 
 
 
@@ -461,21 +519,41 @@ router.get('/box-content/:id', async (req, res) => {
         const box = await boxService.getBoxById(boxId);
         const userId = req.session.user ? req.session.user.id : null;
 
+        const isOwner = box.user_id === userId
+
+        if (!userId) {
+            req.flash('error', 'Du måste vara inloggad för att se denna box.');
+            return res.redirect('/login');
+        }
+
+        if (isOwner) {
+            return res.render('boxContent', { box, isOwner, title: 'Box Content', messages: req.flash() });
+        }
+
+        // If the box is private and the user is not the owner, check for access
+        if (box.visibility === 'private') {
+            const hasAccess = await boxService.userHasAccess(boxId, userId);
+            if (!hasAccess) {
+                req.flash('error', 'Du har inte behörighet att visa denna box.');
+                return res.redirect('/boxes');
+            }
+        }
+
         // Om användaren är inloggad
         if (userId) {
             if (box.user_id === userId || boxService.userHasAccess(boxId, userId)) {
                 // Om användaren är ägare av boxen, visa innehållet direkt
-                return res.render('boxContent', { box, title: 'Box Content', messages: req.flash() });
+                return res.render('boxContent', { box, title: 'Box Content', isOwner, messages: req.flash() });
             }
 
             // Om boxen är privat och användaren inte är ägaren, krävs PIN-kod
-            if (box.visibility === 'private') {
+            if (!isOwner && box.visibility === 'private') {
                 return res.render('boxPin', { boxId, title: 'Box PIN Required', messages: req.flash() });
             }
 
             // Om boxen är offentlig, visa innehållet direkt
             if (box.visibility === 'public') {
-                return res.render('boxContent', { box, title: 'Box Content', messages: req.flash() });
+                return res.render('boxContent', { box, title: 'Box Content',isOwner, messages: req.flash() });
             }
         } else {
             // För icke-inloggade användare
@@ -500,7 +578,10 @@ router.post('/box-content/:id', async (req, res) => {
     try {
         const boxId = req.params.id;
         const { pin } = req.body;
+    
         const box = await boxService.getBoxById(boxId);
+        console.log("boxid under /box",boxId)
+        console.log("box under /box-content", box)
 
         // Kontrollera om boxen är privat och om PIN-koden matchar
         if (box.visibility === 'private') {
@@ -548,32 +629,37 @@ router.post('/sendmail', async (req, res) => {
 
 
 
-router.post('/box-content/share-box', async (req, res) => {
-    const { boxId, email } = req.body;
-    const currentUserId = req.session.user.id; // Den användare som delar lådan
+router.post('/share-box', async (req, res) => {
+    const { box_id, email } = req.body;
+    console.log("this is req body", req.body)
+    
+    const currentUserId = req.session.user.id;
+    console.log("boxID",box_id) // Den användare som delar lådan
 
     try {
         // Kontrollera att lådan tillhör den nuvarande användaren
-        const box = await boxService.getBoxById(boxId);
+        const box = await boxService.getBoxById(box_id);
+        console.log('Box to share:', box);
         if (box.user_id !== currentUserId) {
             return res.status(403).send('Du har inte behörighet att dela denna låda.');
         }
 
         // Hämta userId baserat på e-postadress
         const userToShareWith = await userService.getUserByEmail(email);
+        console.log('User to share with:', userToShareWith);
         if (!userToShareWith) {
             return res.status(404).send('Användaren med angiven e-postadress finns inte.');
         }
 
         // Spara delningen i databasen
-        await boxShareService.shareBox(boxId, userToShareWith.id);
+        await boxService.shareBox(box_id, userToShareWith.user_id);
 
         req.flash('success', 'Lådan har delats framgångsrikt!');
-        res.redirect(`/box-content/${boxId}`);
+        res.redirect(`/box-content/${box_id}`);
     } catch (error) {
         console.error('Error sharing box:', error);
         req.flash('error', 'Kunde inte dela lådan: ' + error.message);
-        res.redirect(`/box-content/${boxId}`);
+        res.redirect(`/box-content/${box_id}`);
     }
 });
 

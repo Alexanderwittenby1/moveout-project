@@ -8,11 +8,12 @@ Before you can run the project, ensure that you have the following software inst
 - [Node.js](https://nodejs.org/) (version 14.x or higher)
 - [npm](https://www.npmjs.com/) (Node Package Manager)
 - [MySQL](https://www.mysql.com/) (or any other SQL database)
+- [Vscode](https://code.visualstudio.com/download)
 
 ## Step 1: Clone the Repository
 Clone the repository to your local machine using the following command:
 ```sh
-git clone https://github.com/yourusername/moveout-project.git
+git clone https://github.com/Alexanderwittenby1/moveout-project.git
 ```
 
 ## Step 2: Install Dependencies
@@ -22,10 +23,15 @@ Navigate to the project directory and install the required dependencies:
 - npm install
 
 
-## Step 3: Configure the Database
+## Step 3: Configure & setting up the Database
+First you will need the change the config file located /config/db/moveout.json so that it matches your Mariadb/mysql.
+
 
 - cd moveout-project/SQL
 - Start mariadb/mysql
+
+Now with mariaDB/Mysql running, Run the following commands:
+
 - SOURCE setup.sql
 - SOURCE ddl.sql
 

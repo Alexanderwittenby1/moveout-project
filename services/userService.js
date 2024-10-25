@@ -181,6 +181,16 @@ async function comparePasswords(provided, stored) {
     return await bcrypt.compare(provided, stored);
 }
 
+
+async function deactivateUser(userId, is_active) {
+    try {
+        return await userModel.deactivateUser(userId,is_active);
+    } catch (error) {
+        console.error('Error deactivating user:', error);
+        throw new Error('Could not deactivate user');
+    }
+}
+
 module.exports = {
     createUser,
     verifyUser,
@@ -194,5 +204,6 @@ module.exports = {
     setAdmin,
     getUserById,
     changePassword,
-    comparePasswords
+    comparePasswords,
+    deactivateUser
 };

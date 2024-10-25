@@ -130,6 +130,7 @@ const login = async (email, password) => {
     }
 };
 
+
 // Funktion för att uppdatera användarens verifieringsstatus
 const updateUserVerificationStatus = async (email, isVerified) => {
     try {
@@ -217,9 +218,9 @@ async function getUserById(user_id) {
     }
 }
 
+
 async function changePassword(user_id, newPassword) { 
     try {
-        
         const query = 'UPDATE users SET password_hash = ? WHERE user_id = ?';
         const [results] = await db.query(query, [newPassword, user_id]);
         return results;
@@ -229,6 +230,16 @@ async function changePassword(user_id, newPassword) {
     }
 }
 
+async function deactivateUser(user_id, is_active) {
+    try {
+        const query = 'UPDATE users SET is_active = ? WHERE user_id = ?';
+        const [results] = await db.query(query, [is_active,user_id]);
+        return results;
+    } catch (error) {
+        console.error('Error deactivating user:', error);
+        throw new Error('Could not deactivate user');
+    }
+}
 
 
 module.exports = {
@@ -245,5 +256,6 @@ module.exports = {
     getAllUsers,
     setAdmin,
     getUserById,
-    changePassword
+    changePassword,
+    deactivateUser
 };
