@@ -30,7 +30,7 @@ First you will need the change the config file located /config/db/moveout.json s
 - cd moveout-project/SQL
 - Start mariadb/mysql
 
-Now with mariaDB/Mysql running, Run the following commands:
+Now with mariaDB/Mysql running, Run the following commands: Note! Start mariaDB/mysql in the folder /sql
 
 - SOURCE setup.sql
 - SOURCE ddl.sql
